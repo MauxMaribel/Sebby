@@ -8,6 +8,8 @@ client = discord.Client()
 
 rude_list = ['spit in your drink', 'licked the rim of the glass', 'used a dirty glass', 'dunked a roach in the drink']
 
+test_list = []
+
 
 
 @client.event
