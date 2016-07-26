@@ -19,11 +19,10 @@ def find_by_class(classname, classlevel=None):
 	return results
 
 def find_class_spells(classname, classlevel):
+	items = find_by_class(classname, classlevel)
 	results = []
-	classname = classname.lower()
-	for s in all:
-		if classname in s['classes'] and (classlevel == None or s['classes'][classname] == classlevel):
-			spell_name = s['name']
-			results.append(spell_name)
+	for spell in items:
+		results.append(spell['name'])
 	results.sort()
 	return results
+
