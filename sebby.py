@@ -34,7 +34,7 @@ async def on_message(message):
 	elif message.content.startswith('!spank'):
 		await client.send_message(message.channel, '*Sebby turns Vexi across his knee and starts spanking her!!!*')
 	elif message.content.startswith('!roll '):
-		match = re.match('!roll *(\d+)d(\d+) *(choose (\d+))?', message.content)
+		match = re.match('!roll *(\d+)d(\d+) *(choose (\d+))? *(add (\d+))', message.content)
 		if match == None:
 			await client.send_message(message.channel, "I don't recognize that dice roll. Try again. :)")
 		else:
@@ -43,6 +43,7 @@ async def on_message(message):
 			nchoose = ndice
 			if match.group(4) != None:
 				nchoose = int(match.group(4))
+
 			rolls = []
 			total = 0
 			msg = ''
@@ -56,6 +57,10 @@ async def on_message(message):
 			rolls.sort()
 			rolls.reverse()
 			rolls = rolls[:nchoose]
+			if match.group(6) != None:
+				nadd = int(match.group(6))
+				total += nadd
+				msg += ' + %d' % nadd
 			for i in rolls:
 				total += i
 
@@ -65,6 +70,8 @@ async def on_message(message):
 		msg = """
 	Pathfinder Related:
 		!roll
+		  !roll choose
+		  !roll add
 		!listspells (Under Construction)
 		!spellinfo spellname
 		
@@ -76,7 +83,7 @@ async def on_message(message):
 		await client.send_message(message.channel, msg)
 	
 	elif message.content.startswith('!listspells'):
-		match = re.match('!listspells (.+) (\d+)')
+		match = re.match('!listspells (.+) (\d+)', message.content)
 		temp_list = []
 		pclass = match.group(1)
 		level = int(match.group(2))
@@ -86,13 +93,14 @@ async def on_message(message):
 		if class_list == []:
 			await client.send_message(message.channel, "I do not have any information for that. Try again.")
 		else:
+			msg = "You asked about %s level %d spells." % (temp_list[0], level)
 			await client.send_message(message.channel, msg)
 			def cleanspells(class_list):
 				msg = ''
-				for s in class_spells:
+				for s in class_list:
 					msg = msg + ('%s \n' % s)
 				return msg
-			result = cleanspells(class_spells)
+			result = cleanspells(class_list)
 			await client.send_message(message.channel, result)
 		
 	elif message.content.startswith('!spellinfo'):
