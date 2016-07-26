@@ -8,8 +8,6 @@ client = discord.Client()
 
 rude_list = ['spit in your drink', 'licked the rim of the glass', 'used a dirty glass', 'dunked a roach in the drink']
 
-test_list = []
-
 
 
 @client.event
@@ -78,13 +76,24 @@ async def on_message(message):
 		await client.send_message(message.channel, msg)
 	
 	elif message.content.startswith('!listspells'):
-		match = re.match('!listspells (.+) (\d+)', message.content)
+		match = re.match('!listspells (.+) (\d+)')
+		temp_list = []
 		pclass = match.group(1)
 		level = int(match.group(2))
-		await client.send_message(message.channel, pclass)
-		await client.send_message(message.channel, level)
-		if match == None:
-			await client.send_message(message.channel, "Sorry that is not a valid option. Try again.")
+		temp_list.append(pclass)
+		class_list = spells.find_class_spells(temp_list[0], level)
+		
+		if class_list == []:
+			await client.send_message(message.channel, "I do not have any information for that. Try again.")
+		else:
+			await client.send_message(message.channel, msg)
+			def cleanspells(class_list):
+				msg = ''
+				for s in class_spells:
+					msg = msg + ('%s \n' % s)
+				return msg
+			result = cleanspells(class_spells)
+			await client.send_message(message.channel, result)
 		
 	elif message.content.startswith('!spellinfo'):
 		spell = message.content[11:]
