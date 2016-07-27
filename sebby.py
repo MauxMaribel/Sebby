@@ -34,7 +34,7 @@ async def on_message(message):
 	elif message.content.startswith('!spank'):
 		await client.send_message(message.channel, '*Sebby turns Vexi across his knee and starts spanking her!!!*')
 	elif message.content.startswith('!roll '):
-		match = re.match('!roll *(\d+)d(\d+) *(choose (\d+))? *(add (\d+))', message.content)
+		match = re.match('!roll *(\d+)d(\d+) *(choose (\d+))? *(add (\d+))?', message.content)
 		if match == None:
 			await client.send_message(message.channel, "I don't recognize that dice roll. Try again. :)")
 		else:
