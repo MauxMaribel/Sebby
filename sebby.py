@@ -101,7 +101,24 @@ async def on_message(message):
 					msg = msg + ('%s \n' % s)
 				return msg
 			result = cleanspells(class_list)
-			await client.send_message(message.channel, result)
+			if len(class_list) >= 60:
+				result1 = class_list[0:60]
+				result1 = cleanspells(result1)
+				result2 = class_list[60:]
+				result2 = cleanspells(result2)
+				if len(class_list) >= 120:
+					result2 = class_list[60:120]
+					result2 = cleanspells(result2)
+					result3 = class_list[120:]
+					result3 = cleanspells(result3)
+					await client.send_message(message.channel, result1)
+					await client.send_message(message.channel, result2)
+					await client.send_message(message.channel, result3)
+				else:
+					await client.send_message(message.channel, result1)
+					await client.send_message(message.channel, result2)
+			else:
+				await client.send_message(message.channel, result)
 		
 	elif message.content.startswith('!spellinfo'):
 		spell = message.content[11:]
@@ -110,9 +127,31 @@ async def on_message(message):
 		if answer == None:
 			await client.send_message(message.channel, "Sorry, that is not a valid spell. Try again.")
 		else:
-			msg = "You asked about: {}."
-			await client.send_message(message.channel, msg.format(spell))
-			await client.send_message(message.channel, answer)
+			msg = '%s \n' % answer['name']
+			if 'classes' in answer:
+				msg += 'Classes: %s \n' % answer['classes']
+			if 'school' in answer:
+				msg += 'School: %s \n' % answer['school']
+			if 'components' in answer:
+				msg += 'Components: %s \n' % answer['components']
+			if 'spell_resistance' in answer:
+				msg += 'Spell Resistance: %s \n' % answer['spell_resistance']
+			if 'range' in answer:
+				msg += 'Range: %s \n' % answer['range']
+			if 'saving_throw' in answer:
+				msg += 'Saving Throw: %s \n' % answer['saving_throw']
+			if 'casting_time' in answer:
+				msg += 'Casting Time: %s \n' % answer['casting_time']
+			if 'duration' in answer:
+				msg += 'Duration: %s \n' % answer['duration']
+			if 'effect' in answer:
+				msg += 'Effect: %s \n' % answer['effect']
+			if 'url' in answer:
+				msg += 'URL: %s \n' % answer['url']
+			if 'description' in answer:
+				msg2 = 'Description: %s \n' % answer['description']
+			await client.send_message(message.channel, msg)
+			await client.send_message(message.channel, msg2)
 			
 	elif message.content.startswith('!makeitbetter'):
 		await client.send_message(message.channel, "*gives you a big hug*")
