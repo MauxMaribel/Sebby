@@ -31,7 +31,7 @@ class Sebby:
 		self.send_message(message.channel, "*Sebby turns Vexi across his knee and starts spanking her!!!*")
 	
 	def command_roll(self, message, command):
-		match = re.match('(\d+)d(\d+) *(choose (\d+))? *(add (\d+))', command)
+		match = re.match('(\d+)d(\d+) *(choose (\d+))? *(add (\d+))?', command)
 		if match == None:
 			self.send_message(message.channel, "I don't recognize that dice roll. Try again. :)")
 		else:
@@ -124,11 +124,17 @@ if __name__ == '__main__':
 		}
 	])
 
-#   FIX THIS BROKEN TEST!!!
-#	run_sebby_test("roll", [
-#		{
-#			"message": "!roll 1d6",
-#			"responses": ["You roll 1d6: [0-9] = [0-9]"],
-#		}
-#	])
+	run_sebby_test("roll", [
+		{
+			"message": "!roll 1d6",
+			"responses": ["You roll 1d6: [0-9] = [0-9]"],
+		}
+	])
 
+	run_sebby_test("roll", [
+		{
+			"message": "!roll 4d20 choose 3",
+			"responses": ["You roll 4d20: [0-20], [0-20], [0-20], [0-20] = [0-60]"],
+			
+		}
+	])
