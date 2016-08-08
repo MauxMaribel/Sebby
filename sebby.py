@@ -134,7 +134,7 @@ class Sebby:
 				self.send_message(message.channel, result)
 	
 	def command_spellinfo(self, message, command):
-		spell = command[11:]
+		spell = message.content[11:]
 		
 		answer = spells.find_by_name(spell)
 		if answer == None:
@@ -244,25 +244,16 @@ if __name__ == '__main__':
 	run_sebby_test("roll", [
 		{
 			"message": "!roll 1d6 add 20",
-			"responses": ["You roll 1d6: [0-9]{1,2} + [0-9]{1,2} = [0-9]{1,2}"],
+			"responses": ["You roll 1d6: [0-9] \+ [0-9]{1,2} = [0-9]{1,2}"],
 			
 		}
 	])
 	
-	run_sebby_test("help", [
+	run_sebby_test("roll", [
 		{
-			"message": "!help",
-			"responses": ["""Pathfinder Related:
-		!roll
-		  !roll choose
-		  !roll add
-		!listspells (Under Construction)
-		!spellinfo spellname
-		
-	For Fun:
-		!makeitbetter
-		!makeitworse
-		!makemeadrink (Under Contruction)
-		!thankyou"""],
+			"message": "!roll 2d6 choose 1 add -1",
+			"responses": ["You roll 2d6: [0-9], [0-9] \+ -[0-9] = [0-9]"],
 		}
 	])
+	
+
