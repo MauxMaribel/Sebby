@@ -31,8 +31,8 @@ platforms = []
 
 def RectOverLap(rect_a, rect_b):
 
-	x_apart = rect_a[0] > rect_b[0] + rect_b[2] or rect_b[0] > rect_a[0] + rect_a[2]
-	y_apart = rect_a[1] > rect_b[1] + rect_b[3] or rect_b[1] > rect_a[1] + rect_a[3]
+	x_apart = rect_a[0] >= rect_b[0] + rect_b[2] or rect_b[0] >= rect_a[0] + rect_a[2]
+	y_apart = rect_a[1] >= rect_b[1] + rect_b[3] or rect_b[1] >= rect_a[1] + rect_a[3]
 	
 	return x_apart == False and y_apart == False
 
