@@ -19,7 +19,7 @@ clock = pygame.time.Clock()
 
 pygame.mouse.set_visible(0)
 
-platformdir = {}
+platforms = []
 
 x_speed = 0
 y_speed = 0
@@ -27,11 +27,9 @@ y_speed = 0
 x_coord = 10
 y_coord = 455
 
-player = [x_coord, y_coord, 50, 20]
 
 def draw_platform(x, y, w, h):
 	
-	platformdir['platform'] = x, y, w, h
 	pygame.draw.rect(screen, green, [x, y, w, h])
 
 def playerCollide(rect_a, player):
@@ -58,7 +56,7 @@ def playerCollide(rect_a, player):
 
 def DetectCollisions():
 
-	for n in platformdir:
+	for n in platforms:
 		playerCollide(n, player)
 		
 
@@ -124,6 +122,12 @@ while not done:
 	
 	draw_platform( 400, 350, 100, 25)
 	draw_platform( 0, 475, 700, 25)
+	
+	player = [x_coord, y_coord, 50, 20]
+	plat_a = [400, 350, 100, 25]
+	plat_b = [0, 475, 700, 25]
+	platforms.append(plat_a)
+	platforms.append(plat_b)
 	
 	pygame.display.flip()
 	
