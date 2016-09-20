@@ -65,9 +65,9 @@ def DetectCollisions():
 
 def MoveHoizontally(amount):
 
+	global x_coord
 	if amount > 0:
 		direction = 1
-	
 	else:
 		direction = -1
 	x_coord += amount
