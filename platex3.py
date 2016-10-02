@@ -19,7 +19,8 @@ clock = pygame.time.Clock()
 
 pygame.mouse.set_visible(0)
 
-platforms = []
+plat_a = [400, 350, 100, 25]
+plat_b = [0, 475, 700, 25]
 
 x_speed = 0
 y_speed = 0
@@ -54,10 +55,10 @@ def playerCollide(rect_a, player):
 	return x_apart == False and y_apart == False
 
 
-def DetectCollisions():
+def DetectCollisions(player):
 
-	for n in platforms:
-		playerCollide(n, player)
+	playerCollide(plat_b, player)
+	playerCollide(plat_a, player)
 		
 
 	
@@ -65,32 +66,34 @@ def DetectCollisions():
 
 def MoveHoizontally(amount):
 
+
 	global x_coord
 	if amount > 0:
-		direction = 1
+		direction = 10
 	else:
-		direction = -1
+		direction = -10
 	x_coord += amount
 		
-	answer = DetectCollisions()
-	if answer == True:
+	answer = DetectCollisions(player)
+	while answer == False:
 		x_coord -= direction
 		
 		
 def MoveVertically(amount):
-
+	global y_coord
+	global y_speed
 	if amount > 0:
-		direction = 10
+		direction = 1
 		
 	else:
-		direction = -10
+		direction = -1
 	
 	y_coord += amount
 	
-	answer = DetectCollisions()
-	if answer == True:
+	answer = DetectCollisions(player)
+	while answer == False:
 		y_coord -= direction
-		y_speed = 0
+
 		
 		
 while not done:
@@ -101,19 +104,24 @@ while not done:
 			
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_a:
-				MoveHoizontally(3)
+				MoveHoizontally(-10)
 				
-			elif event.type == pygame.K_d:
-				MoveHoizontally(-3)
+			elif event.key == pygame.K_d:
+				MoveHoizontally(10)
 				
-			elif event.type == pygame.K_w and y_speed == 0:
-				MoveVertically(-10)
+			elif event.key == pygame.K_w and y_speed == 0:
+				MoveVertically(-30)
 				
 		elif event.type == pygame.KEYUP:
 			if event.key == pygame.K_a or event.key == pygame.K_d:
 				MoveHoizontally(0)
-				
-	y_speed = y_speed + 0.3
+			
+	player = [x_coord, y_coord, 50, 20]
+			
+	if DetectCollisions(player) == True:
+		y_speed = y_speed + 0.3
+	else:
+		Y_speed = 0
 
 	
 	screen.fill(black)
@@ -123,11 +131,8 @@ while not done:
 	draw_platform( 400, 350, 100, 25)
 	draw_platform( 0, 475, 700, 25)
 	
-	player = [x_coord, y_coord, 50, 20]
-	plat_a = [400, 350, 100, 25]
-	plat_b = [0, 475, 700, 25]
-	platforms.append(plat_a)
-	platforms.append(plat_b)
+
+
 	
 	pygame.display.flip()
 	
