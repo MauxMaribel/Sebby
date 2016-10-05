@@ -20,26 +20,51 @@ clock = pygame.time.Clock()
 
 pygame.mouse.set_visible(0)
 
+#needs to be adjusted into sprite list
 enemies = []
 
-class Enemy(object):
+level = 0
 
-	#So needs more work and research before being a thing
-	
-	def __init__(self):
-	
-		x = randint(50, 220)
-		y = randint(50, 430)
-	
-		pygame.draw.rect(screen, red, [x, y, 30, 20])
-		
-		pygame.screen.flip()
+sprites = []
 		
 def spawnenemies(amount):
 
-	#needs some code here
+	#still needs to be updates so enemies cant collide
+
+	for i in range(amount):
+		x = randint(50, 420)
+		y = randint(50, 230)
 	
-	return True
+		new_enemy = [x, y, 30, 20]
+		enemies.append(new_enemy)
+		
+		
+def drawenemies(enemies):
+	#needs to become drawsprites
+	
+	for i in enemies:
+		pygame.draw.rect(screen, red, i)
+		
+#def movesprite(sprite):
+
+#	#basic physics all objects have, move them by their speed
+	
+#	sprite["x"] += sprite["x_speed"]
+#	sprite["y"] += sprite["y_speed"]
+	
+#	if sprite["type"] == "player":
+		#cool player stuff here
+		
+#	elif sprite["type"] == "enemy_ship":
+#		#cool enemy stuff here
+		
+	
+
+	
+		
+
+	
+	
 
 x_coord = 250
 y_coord = 450
@@ -70,11 +95,21 @@ while not done:
 				
 	screen.fill(black)
 	pygame.draw.rect(screen, blue, [x_coord, y_coord, 20, 30])
+	drawenemies(enemies)
 	pygame.display.flip()
+
 	
+
 	x_coord = x_coord + x_speed
 	
 	
+	
+	if level == 0:
+		spawnenemies(5)
+		
+		level = level + 1
+	
+
 
 				
 	if x_coord < 0:
