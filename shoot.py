@@ -8,9 +8,13 @@ white = (255, 255, 255)
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
+pink = (255, 127, 200)
+
 
 size = [500, 500]
 screen = pygame.display.set_mode(size)
+
+font = pygame.font.SysFont('Calibri', 10, True, False)
 
 pygame.display.set_caption("Under Construction Shooter <3")
 
@@ -20,14 +24,27 @@ clock = pygame.time.Clock()
 
 pygame.mouse.set_visible(0)
 
-#needs to be adjusted into sprite list
-enemies = []
 
-level = 0
 
-sprites = []
+#find out how to make a health bar
+
+health = 100
+
+#make display for stage
+stage = 0
+
+
+score = 0
+
+x_coord = 250
+y_coord = 450
+
+x_speed = 0
+y_speed = 0
+
+sprites = [{"type": "player", "x_coord": x_coord, "y_coord": y_coord, "health": health, "x_width": 20, "y_length": 30, "color": blue}]
 		
-def spawnenemies(amount):
+def spawnbasicenemies(amount):
 
 	#still needs to be updates so enemies cant collide
 
@@ -35,15 +52,16 @@ def spawnenemies(amount):
 		x = randint(50, 420)
 		y = randint(50, 230)
 	
-		new_enemy = [x, y, 30, 20]
-		enemies.append(new_enemy)
+		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "health": 10, "color": pink}
+
+		sprites.append(new_enemy)
 		
-		
-def drawenemies(enemies):
-	#needs to become drawsprites
+def drawsprites(sprites):
 	
-	for i in enemies:
-		pygame.draw.rect(screen, red, i)
+	x = 0
+	for i in sprites:
+		pygame.draw.rect(screen, sprites[x]["color"], [sprites[x]["x_coord"], sprites[x]["y_coord"], sprites[x]["x_width"], sprites[x]["y_length"]])
+		x += 1
 		
 #def movesprite(sprite):
 
@@ -57,22 +75,15 @@ def drawenemies(enemies):
 		
 #	elif sprite["type"] == "enemy_ship":
 #		#cool enemy stuff here
+
+#	elif sprite["type"] == "basic_enemy":
+		#move cool stuff
 		
-	
+#def detectcollisions(object_a, object_b):	
 
-	
-		
-
-	
-	
-
-x_coord = 250
-y_coord = 450
-
-x_speed = 0
-y_speed = 0
 
 while not done:
+
 	
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -92,22 +103,37 @@ while not done:
 	player = [x_coord, y_coord, 20, 30]
 	
 	score = 0
-				
+	
+	
 	screen.fill(black)
-	pygame.draw.rect(screen, blue, [x_coord, y_coord, 20, 30])
-	drawenemies(enemies)
+	
+	text = font.render("Score", True, white)
+	screen.blit(text, [0,0])
+
+	text = font.render(str(score), True, white)
+	screen.blit(text, [60, 0])
+	
+	text = font.render("Stage:", True, white)
+	screen.blit(text, [420, 0])
+	
+	text = font.render(str(stage), True, white)
+	screen.blit(text, [475, 0])
+	
+	drawsprites(sprites)
 	pygame.display.flip()
 
 	
 
 	x_coord = x_coord + x_speed
+	sprites[0]["x_coord"] = x_coord
 	
 	
 	
-	if level == 0:
-		spawnenemies(5)
+	
+	if stage == 0:
+		spawnbasicenemies(5)
 		
-		level = level + 1
+		stage = stage + 1
 	
 
 
