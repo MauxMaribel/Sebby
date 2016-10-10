@@ -14,7 +14,7 @@ pink = (255, 127, 200)
 size = [500, 500]
 screen = pygame.display.set_mode(size)
 
-font = pygame.font.SysFont('Calibri', 10, True, False)
+font = pygame.font.SysFont('Calibri', 15, True, False)
 
 pygame.display.set_caption("Under Construction Shooter <3")
 
@@ -26,6 +26,8 @@ pygame.mouse.set_visible(0)
 
 
 
+
+
 #find out how to make a health bar
 
 health = 100
@@ -33,6 +35,8 @@ health = 100
 
 stage = 0
 
+#bonus for accurate shots. Later show combo on screen
+combo = 0
 
 score = 0
 
@@ -42,7 +46,7 @@ y_coord = 450
 x_speed = 0
 y_speed = 0
 
-sprites = [{"type": "player", "x_coord": x_coord, "y_coord": y_coord, "health": health, "x_width": 20, "y_length": 30, "color": blue}]
+sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": health, "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
 
 def DetectCollisions(rect_a, rect_b):
@@ -66,6 +70,25 @@ def DetectCollisions(rect_a, rect_b):
 	
 	return x_apart == False and y_apart == False
 	
+
+
+def NextStage(level):
+
+	global stage
+
+	#insert some text or animations for stage increase
+	m = 0
+	new_stage = True
+	for i in sprites:
+		if sprites[m]["type"] == "basic_enemy":
+			new_stage = False
+		m += 1
+			
+	if new_stage == True:
+		spawnbasicenemies(level + 2)
+		stage += 1
+	
+	
 def EnemyCollision(new_enemy):
 
 	z = 0
@@ -76,8 +99,8 @@ def EnemyCollision(new_enemy):
 	
 	for item in sprites:
 		rect_b = [sprites[z]["x_coord"],sprites[z]["y_coord"],sprites[z]["x_width"],sprites[z]["y_length"]]
-		if DetectCollisions(rect_a, rect_b) == True:
-			return True
+		if DetectCollisions(rect_a, rect_b) == True and sprites[z]["type"] != "p_bullet":
+			return z
 		else:
 			z += 1
 			
@@ -95,7 +118,7 @@ def spawnbasicenemies(amount):
 		x = randint(50, 420)
 		y = randint(50, 230)
 	
-		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "health": 10, "color": pink}
+		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "x_speed": 0, "y_speed": 0, "health": 10, "score": 100, "color": pink}
 
 		if EnemyCollision(new_enemy) == False:
 
@@ -104,12 +127,16 @@ def spawnbasicenemies(amount):
 
 def firebullet(amount):
 
+	global combo
+
 
 	x = sprites[0]["x_coord"] + 10
 	y = sprites[0]["y_coord"] - 6
 	
-	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 6, "y_speed": -20, "color": green}
+	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "color": green}
 	sprites.append(new_bullet)
+	
+	combo += 1
 		
 def drawsprites(sprites):
 	
@@ -118,15 +145,42 @@ def drawsprites(sprites):
 		pygame.draw.rect(screen, sprites[x]["color"], [sprites[x]["x_coord"], sprites[x]["y_coord"], sprites[x]["x_width"], sprites[x]["y_length"]])
 		x += 1
 		
-#def movesprite(sprite):
+def movesprite(sprites):
 
-#   For bullet: if y_coord < 0, make sure to delete sprint from list
-#	This is probably where resolutions to things should happen like bullets damaging ships and such
+	global score
+	global combo
 
 #	#basic physics all objects have, move them by their speed
+	i = 0
+	while i < len(sprites):
+		sprites[i]["x_coord"] += sprites[i]["x_speed"]
+		sprites[i]["y_coord"] += sprites[i]["y_speed"]
 	
-#	sprite["x_coord"] += sprite["x_speed"]
-#	sprite["y_coord"] += sprite["y_speed"]
+		if sprites[i]["type"] == "p_bullet":
+			if sprites[i]["y_coord"] < 0:
+				sprites.remove(sprites[i])
+				combo = 0
+			elif EnemyCollision(sprites[i]) != False:
+				enemy = EnemyCollision(sprites[i])
+				sprites[enemy]["health"] = sprites[enemy]["health"] - sprites[i]["damage"]
+				sprites.remove(sprites[i])
+
+			
+				
+		elif sprites[i]["health"] <= 0:
+			if sprites[i]["type"] != "player":
+				score += sprites[i]["score"] * combo
+				sprites.remove(sprites[i])
+			
+				
+
+		
+		elif sprites[i]["x_coord"] < 0:
+			sprites[i]["x_coord"] = 0
+		
+		elif sprites[i]["x_coord"] + 20 > 500:
+			sprites[i]["x_coord"] = 500 - 20
+		i += 1
 	
 #	if sprite["type"] == "player":
 		#cool player stuff here
@@ -148,21 +202,23 @@ while not done:
 			
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_a:
-				x_speed = -3
+				sprites[0]["x_speed"] = -5
 			
 			elif event.key == pygame.K_d:
-				x_speed = 3
+				sprites[0]["x_speed"] = 5
 				
 			elif event.key == pygame.K_SPACE:
 				firebullet(1)
 				
 		elif event.type == pygame.KEYUP:
 			if event.key == pygame.K_a or event.key == pygame.K_d:
-				x_speed = 0
+				sprites[0]["x_speed"] = 0
 				
-	player = [x_coord, y_coord, 20, 30]
 	
-	score = 0
+	
+	
+	
+	movesprite(sprites)
 	
 	
 	screen.fill(black)
@@ -183,26 +239,14 @@ while not done:
 	pygame.display.flip()
 
 	
-
-	x_coord = x_coord + x_speed
-	sprites[0]["x_coord"] = x_coord
 	
 	
 	
+	NextStage(stage)
 	
-	if stage == 0:
-		spawnbasicenemies(5)
-		
-		stage = stage + 1
 	
 
 
-				
-	if x_coord < 0:
-		x_coord = 0
-		
-	elif x_coord + 20 > 500:
-		x_coord = 500 - 20
 		
 	clock.tick(60)
 	
