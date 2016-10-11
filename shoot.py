@@ -54,7 +54,8 @@ y_coord = 450
 x_speed = 0
 y_speed = 0
 
-sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": health, "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
+sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": health,
+ "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
 
 def DetectCollisions(rect_a, rect_b):
@@ -89,7 +90,8 @@ def enemydeath(enemy):
 	while i > 0:
 		x_speed = randint(-3, 3)
 		y_speed = randint(-3, 3)
-		part = {"type": "particle", "x_coord": x, "y_coord": y, "x_speed": x_speed, "y_speed": y_speed, "y_length": 2, "x_width": 2, "time": 9, "health": 2, "color": color, "color2": color2}
+		part = {"type": "particle", "x_coord": x, "y_coord": y, "x_speed": x_speed,
+		"y_speed": y_speed, "y_length": 2, "x_width": 2, "time": 11, "health": 2, "color": color, "color2": color2}
 		sprites.append(part)
 		i -= 1
 
@@ -130,8 +132,6 @@ def EnemyCollision(new_enemy):
 
 		
 def spawnbasicenemies(amount):
-
-	
 	
 	i = amount
 	
@@ -140,8 +140,11 @@ def spawnbasicenemies(amount):
 		x = randint(50, 420)
 		y = randint(50, 230)
 		color = colors[randint(0, 8)]
+		x_speed = randint(-3, 3)
+		y_speed = randint(-3, 3)
 	
-		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "x_speed": 0, "y_speed": 0, "health": 10, "score": 100, "color": color}
+		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y,
+		"x_width": 30, "y_length": 20, "x_speed": x_speed, "y_speed": y_speed, "health": 10, "score": 100, "color": color}
 
 		if EnemyCollision(new_enemy) == False:
 
@@ -157,7 +160,8 @@ def firebullet(amount):
 	y = sprites[0]["y_coord"] - 6
 	color = colors[randint(0, 8)]
 	
-	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "health": 1, "color": color}
+	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2,
+	"y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "health": 1, "color": color}
 	sprites.append(new_bullet)
 	
 	combo += 1
@@ -189,11 +193,43 @@ def movesprite(sprites):
 				if sprites[enemy]["type"] != "particle":
 					sprites[enemy]["health"] = sprites[enemy]["health"] - sprites[i]["damage"]
 					sprites.remove(sprites[i])
-
 			
+		elif sprites[i]["type"] == "basic_enemy":
+				
+			#after about stage 18 boxes get stuck in each other. Need to address that	
+				
+			result = EnemyCollision(sprites[i])
+			
+			if result != False:
+				sprites[i]["y_speed"] *= -1
+				sprites[i]["x_speed"] *= -1
+				sprites[result]["y_speed"] *= -1
+				sprites[result]["x_speed"] *= -1
+			
+			if sprites[i]["y_coord"] < 0:
+				sprites[i]["y_coord"] = 0
+				sprites[i]["y_speed"] *= -1
+			
+			elif sprites[i]["y_coord"] >= 400:
+				sprites[i]["y_coord"] = 400
+				sprites[i]["y_speed"] *= -1
+				
+			elif sprites[i]["x_coord"] < 0:
+				sprites[i]["x_coord"] = 0
+				sprites[i]["x_speed"] *= -1
 		
-		elif sprites[i]["health"] <= 0:
-			if sprites[i]["type"] != "player":
+			elif sprites[i]["x_coord"] + 30 > 500:
+				sprites[i]["x_coord"] = 500 - 30
+				sprites[i]["x_speed"] *= -1
+				
+			elif sprites[i]["x_speed"] == 0:
+				sprites[i]["x_speed"] = 1
+				
+			elif sprites[i]["y_speed"] == 0:
+				sprites[i]["y_speed"] = 1
+		
+			elif sprites[i]["health"] <= 0:
+			
 				score += sprites[i]["score"] * combo
 				enemydeath(sprites[i])
 				sprites.remove(sprites[i])
@@ -206,13 +242,16 @@ def movesprite(sprites):
 			
 			if sprites[i]["time"] <= 0:
 				sprites.remove(sprites[i])
+				
+		elif sprites[i]["type"] == "player":
+			if sprites[i]["x_coord"] < 0:
+				sprites[i]["x_coord"] = 0
 
 		
-		elif sprites[i]["x_coord"] < 0:
-			sprites[i]["x_coord"] = 0
+			elif sprites[i]["x_coord"] + 20 > 500:
+				sprites[i]["x_coord"] = 500 - 20
+
 		
-		elif sprites[i]["x_coord"] + 20 > 500:
-			sprites[i]["x_coord"] = 500 - 20
 		i += 1
 		
 	
