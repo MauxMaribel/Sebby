@@ -9,6 +9,14 @@ red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
 pink = (255, 127, 200)
+purple = (200, 100, 230)
+orange = (255, 127, 0)
+l_blue = (0, 240, 255)
+yellow = (255, 255, 0)
+
+colors = [red, green, blue, pink, purple, l_blue, orange, yellow, white]
+
+
 
 
 size = [500, 500]
@@ -70,6 +78,20 @@ def DetectCollisions(rect_a, rect_b):
 	
 	return x_apart == False and y_apart == False
 	
+def enemydeath(enemy):
+	
+	x = enemy["x_coord"]
+	y = enemy["y_coord"]
+	color = colors[randint(0, 8)]
+	color2 = colors[randint(0, 8)]
+
+	i = 50
+	while i > 0:
+		x_speed = randint(-3, 3)
+		y_speed = randint(-3, 3)
+		part = {"type": "particle", "x_coord": x, "y_coord": y, "x_speed": x_speed, "y_speed": y_speed, "y_length": 2, "x_width": 2, "time": 9, "health": 2, "color": color, "color2": color2}
+		sprites.append(part)
+		i -= 1
 
 
 def NextStage(level):
@@ -117,8 +139,9 @@ def spawnbasicenemies(amount):
 
 		x = randint(50, 420)
 		y = randint(50, 230)
+		color = colors[randint(0, 8)]
 	
-		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "x_speed": 0, "y_speed": 0, "health": 10, "score": 100, "color": pink}
+		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y, "x_width": 30, "y_length": 20, "x_speed": 0, "y_speed": 0, "health": 10, "score": 100, "color": color}
 
 		if EnemyCollision(new_enemy) == False:
 
@@ -132,8 +155,9 @@ def firebullet(amount):
 
 	x = sprites[0]["x_coord"] + 10
 	y = sprites[0]["y_coord"] - 6
+	color = colors[randint(0, 8)]
 	
-	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "color": green}
+	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "health": 1, "color": color}
 	sprites.append(new_bullet)
 	
 	combo += 1
@@ -150,7 +174,7 @@ def movesprite(sprites):
 	global score
 	global combo
 
-#	#basic physics all objects have, move them by their speed
+	#basic physics all objects have, move them by their speed
 	i = 0
 	while i < len(sprites):
 		sprites[i]["x_coord"] += sprites[i]["x_speed"]
@@ -162,17 +186,26 @@ def movesprite(sprites):
 				combo = 0
 			elif EnemyCollision(sprites[i]) != False:
 				enemy = EnemyCollision(sprites[i])
-				sprites[enemy]["health"] = sprites[enemy]["health"] - sprites[i]["damage"]
-				sprites.remove(sprites[i])
+				if sprites[enemy]["type"] != "particle":
+					sprites[enemy]["health"] = sprites[enemy]["health"] - sprites[i]["damage"]
+					sprites.remove(sprites[i])
 
 			
-				
+		
 		elif sprites[i]["health"] <= 0:
 			if sprites[i]["type"] != "player":
 				score += sprites[i]["score"] * combo
+				enemydeath(sprites[i])
 				sprites.remove(sprites[i])
-			
 				
+		elif sprites[i]["type"] == "particle":
+			if sprites[i]["time"] == 2:
+				sprites[i]["color"] = sprites[i]["color2"]
+			
+			sprites[i]["time"] -= 1	
+			
+			if sprites[i]["time"] <= 0:
+				sprites.remove(sprites[i])
 
 		
 		elif sprites[i]["x_coord"] < 0:
@@ -181,15 +214,8 @@ def movesprite(sprites):
 		elif sprites[i]["x_coord"] + 20 > 500:
 			sprites[i]["x_coord"] = 500 - 20
 		i += 1
-	
-#	if sprite["type"] == "player":
-		#cool player stuff here
 		
-#	elif sprite["type"] == "enemy_ship":
-#		#cool enemy stuff here
-
-#	elif sprite["type"] == "basic_enemy":
-		#move cool stuff
+	
 
 
 
