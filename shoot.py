@@ -15,7 +15,7 @@ l_blue = (0, 240, 255)
 yellow = (255, 255, 0)
 
 colors = [red, green, blue, pink, purple, l_blue, orange, yellow, white]
-
+bcolors = [white, pink, yellow]
 
 
 
@@ -57,7 +57,43 @@ y_speed = 0
 sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": health,
  "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
+background_sprites = [] 
+ 
+def CreateBackground(stage):
 
+	global background_sprites
+	background_sprites = []
+
+	i = 100
+	
+	while i > 0:
+
+		x = randint(0, 490)
+		y = randint(20, 490)
+		color = bcolors[randint(0,2)]
+	
+		new_star = {"type": "small", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 2,
+		"y_speed": 0, "color": color}
+		
+		background_sprites.append(new_star)
+		i -= 1
+		
+	i = 50
+	
+	while i > 0:
+	
+		x = randint(0, 500)
+		y = randint(20, 500)
+		color = bcolors[randint(0,2)]
+	
+		new_bigstar = {"type": "large", "x_coord": x, "y_coord": y, "x_width": 4, "y_length": 4,
+		"y_speed": 1, "color": color}
+		
+		background_sprites.append(new_bigstar)
+		i -= 1
+ 
+	
+ 
 def DetectCollisions(rect_a, rect_b):
 
 	#rect_a[0] = plat_xcoord
@@ -99,8 +135,11 @@ def enemydeath(enemy):
 def NextStage(level):
 
 	global stage
+	global background_sprites 
+	global sprites
 
 	#insert some text or animations for stage increase
+	#game over screen probably goes here
 	m = 0
 	new_stage = True
 	for i in sprites:
@@ -108,9 +147,22 @@ def NextStage(level):
 			new_stage = False
 		m += 1
 			
-	if new_stage == True:
+	if new_stage == True and stage < 10:
+		
 		spawnbasicenemies(level + 2)
 		stage += 1
+		
+	elif stage == 10:
+		background_sprites = []
+		sprites = []
+		screen.fill(black)
+		text = font.render(str("Congrats. Level 10 woot!"), True, l_blue)
+		screen.blit(text, [150, 200])
+		
+	elif stage != 10:
+		movesprite(sprites)
+		drawsprites(sprites)
+		
 	
 	
 def EnemyCollision(new_enemy):
@@ -118,8 +170,6 @@ def EnemyCollision(new_enemy):
 	z = 0
 
 	rect_a = [new_enemy["x_coord"],new_enemy["y_coord"],new_enemy["x_width"],new_enemy["y_length"]]
-
-
 	
 	for item in sprites:
 		rect_b = [sprites[z]["x_coord"],sprites[z]["y_coord"],sprites[z]["x_width"],sprites[z]["y_length"]]
@@ -142,9 +192,11 @@ def spawnbasicenemies(amount):
 		color = colors[randint(0, 8)]
 		x_speed = randint(-3, 3)
 		y_speed = randint(-3, 3)
+		shoot = randint(60, 180)
 	
 		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y,
-		"x_width": 30, "y_length": 20, "x_speed": x_speed, "y_speed": y_speed, "health": 10, "score": 100, "color": color}
+		"x_width": 30, "y_length": 20, "x_speed": x_speed, "y_speed": y_speed,
+		"shoot": shoot, "health": 10, "score": 100, "color": color}
 
 		if EnemyCollision(new_enemy) == False:
 
@@ -165,8 +217,24 @@ def firebullet(amount):
 	sprites.append(new_bullet)
 	
 	combo += 1
+	
+def enemyfire(enemy):
+
+	x = enemy["x_coord"] + 15
+	y = enemy["y_coord"] + 10
+	
+	e_bullet = {"type": "e_bullet", "x_coord": x, "y_coord": y, "x_width": 5,
+	"y_length": 7, "y_speed": 6, "x_speed": 0, "damage": 5, "health": 1, "color": l_blue}
+	sprites.append(e_bullet)
 		
 def drawsprites(sprites):
+
+	y = 0
+	
+	for i in background_sprites:
+		pygame.draw.rect(screen, background_sprites[y]["color"], [background_sprites[y]["x_coord"],
+		background_sprites[y]["y_coord"], background_sprites[y]["x_width"], background_sprites[y]["y_length"]])
+		y += 1
 	
 	x = 0
 	for i in sprites:
@@ -180,7 +248,31 @@ def movesprite(sprites):
 
 	#basic physics all objects have, move them by their speed
 	i = 0
+	while i < len(background_sprites):
+		background_sprites[i]["y_coord"] += background_sprites[i]["y_speed"]
+		
+		if background_sprites[i]["type"] == "small" and background_sprites[i]["y_speed"] == 0:
+			if background_sprites[i]["color"] == white:
+				background_sprites[i]["y_speed"] = 3
+				
+			if background_sprites[i]["color"] == pink:
+				background_sprites[i]["y_speed"] = 1
+				
+			if background_sprites[i]["color"] == yellow:
+				background_sprites[i]["y_speed"] = 2
+				
+		elif background_sprites[i]["color"] == yellow and background_sprites[i]["y_speed"] == 3:
+			background_sprites[i]["y_speed"] = randint(1, 2)
+				
+		elif background_sprites[i]["y_coord"] + 2 > 500:
+				background_sprites[i]["y_coord"] = 0
+				
+		i += 1
+ 	
+	
+	i = 0
 	while i < len(sprites):
+	
 		sprites[i]["x_coord"] += sprites[i]["x_speed"]
 		sprites[i]["y_coord"] += sprites[i]["y_speed"]
 	
@@ -227,12 +319,20 @@ def movesprite(sprites):
 				
 			elif sprites[i]["y_speed"] == 0:
 				sprites[i]["y_speed"] = 1
+				
+			sprites[i]["shoot"] -= 1
+				
+			if sprites[i]["shoot"] == 0:
+				enemyfire(sprites[i])
+				sprites[i]["shoot"] = 60
 		
 			elif sprites[i]["health"] <= 0:
 			
 				score += sprites[i]["score"] * combo
 				enemydeath(sprites[i])
 				sprites.remove(sprites[i])
+				
+
 				
 		elif sprites[i]["type"] == "particle":
 			if sprites[i]["time"] == 2:
@@ -256,7 +356,7 @@ def movesprite(sprites):
 		
 	
 
-
+CreateBackground(stage)
 
 while not done:
 
@@ -283,8 +383,6 @@ while not done:
 	
 	
 	
-	movesprite(sprites)
-	
 	
 	screen.fill(black)
 	
@@ -300,17 +398,10 @@ while not done:
 	text = font.render(str(stage), True, white)
 	screen.blit(text, [475, 0])
 	
-	drawsprites(sprites)
+	NextStage(stage)
 	pygame.display.flip()
 
 	
-	
-	
-	
-	NextStage(stage)
-	
-	
-
 
 		
 	clock.tick(60)
