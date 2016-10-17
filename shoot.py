@@ -24,14 +24,95 @@ screen = pygame.display.set_mode(size)
 
 font = pygame.font.SysFont('Calibri', 15, True, False)
 
+button_font = pygame.font.SysFont('Calibri', 25, True, False)
+
 pygame.display.set_caption("Under Construction Shooter <3")
+
+#This is a Button class. You can create buttons using
+#Button() to create a new button object.
+#
+#Example:
+#mybutton = Button()
+#mybutton.text = 'Play Game'
+#mybutton.color = pink
+#mybutton.text_color = black
+class Button:
+	x = 100
+	y = 100
+	w = 120
+	h = 80
+
+	#The text on the button. Change this after creating
+	#a button to set what you want the text to be.
+	text = "test"
+	color = blue
+	color_mouseover = red
+	text_color = white
+
+	#records if the mouse button was pressed on the previous
+	#frame so we can tell if the player has just pressed the
+	#mouse button.
+	mouse_clicked_last_frame = False
+
+	has_been_clicked = False
+
+	#When the player clicks the mouse button this function will
+	#return true the next time you call it.
+	def clicked(self):
+		result = self.has_been_clicked
+		self.has_been_clicked = False
+		return result
+
+	#tells us if the mouse is currently inside the button.
+	def is_mouseover(self):
+		mouse_x = pygame.mouse.get_pos()[0]
+		mouse_y = pygame.mouse.get_pos()[1]
+
+		return mouse_x > self.x and mouse_x < self.x+self.w and mouse_y > self.y and mouse_y < self.y+self.h
+
+	#draw the button. Call this every frame.
+	def draw(self):
+		draw_color = self.color
+		if self.is_mouseover():
+			draw_color = self.color_mouseover
+		pygame.draw.rect(screen, draw_color, [self.x, self.y, self.w, self.h])
+		text_image = button_font.render(self.text, True, self.text_color)
+		text_area = text_image.get_rect()
+		text_w = text_area[2]
+		text_h = text_area[3]
+
+		screen.blit(text_image, [self.x + self.w/2 - text_w/2, self.y + self.h/2 - text_h/2])
+	
+	#Make the mouse think. Call this every frame.
+	def think(self):
+		mouse_clicked = pygame.mouse.get_pressed()[0]
+
+		if mouse_clicked and self.mouse_clicked_last_frame == False and self.is_mouseover():
+			self.has_been_clicked = True
+
+		self.mouse_clicked_last_frame = mouse_clicked
+
+#our list of buttons. This is kind of like sprites but for buttons.
+buttons = []
+
+#Add one test button.
+buttons.append(Button())
+
+#Call this every frame to draw all the buttons
+def drawButtons():
+	for b in buttons:
+		b.draw()
+
+#Call this every frame to think all the buttons
+def thinkButtons():
+	for b in buttons:
+		b.think()
 
 done = False
 
 clock = pygame.time.Clock()
 
-pygame.mouse.set_visible(0)
-
+#pygame.mouse.set_visible(0)
 
 
 
@@ -162,6 +243,7 @@ def NextStage(level):
 	elif stage != 10:
 		movesprite(sprites)
 		drawsprites(sprites)
+
 		
 	
 	
@@ -381,7 +463,10 @@ while not done:
 				
 	
 	
-	
+	thinkButtons()
+	for button in buttons:
+		if button.clicked():
+			print "BUTTON WAS CLICKED!!!"
 	
 	
 	screen.fill(black)
@@ -397,6 +482,8 @@ while not done:
 	
 	text = font.render(str(stage), True, white)
 	screen.blit(text, [475, 0])
+
+	drawButtons()
 	
 	NextStage(stage)
 	pygame.display.flip()
