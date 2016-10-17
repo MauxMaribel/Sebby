@@ -17,7 +17,7 @@ yellow = (255, 255, 0)
 colors = [red, green, blue, pink, purple, l_blue, orange, yellow, white]
 bcolors = [white, pink, yellow]
 
-
+dead = False
 
 size = [500, 500]
 screen = pygame.display.set_mode(size)
@@ -119,7 +119,6 @@ clock = pygame.time.Clock()
 
 #find out how to make a health bar
 
-health = 100
 
 
 stage = 0
@@ -135,7 +134,7 @@ y_coord = 450
 x_speed = 0
 y_speed = 0
 
-sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": health,
+sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
  "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
 background_sprites = [] 
@@ -218,31 +217,43 @@ def NextStage(level):
 	global stage
 	global background_sprites 
 	global sprites
+	global dead
 
 	#insert some text or animations for stage increase
 	#game over screen probably goes here
-	m = 0
-	new_stage = True
-	for i in sprites:
-		if sprites[m]["type"] == "basic_enemy":
-			new_stage = False
-		m += 1
-			
-	if new_stage == True and stage < 10:
-		
-		spawnbasicenemies(level + 2)
-		stage += 1
-		
-	elif stage == 10:
+	if dead == True:
+		sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+ "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 		background_sprites = []
-		sprites = []
 		screen.fill(black)
-		text = font.render(str("Congrats. Level 10 woot!"), True, l_blue)
+		text = font.render(str("You died. Try sucking less."), True, orange)
 		screen.blit(text, [150, 200])
+	
+	elif dead == False:
+		m = 0
+		new_stage = True
+		for i in sprites:
+			if sprites[m]["type"] == "basic_enemy":
+				new_stage = False
+			m += 1
+
+			
+		if new_stage == True and stage < 10:
 		
-	elif stage != 10:
-		movesprite(sprites)
-		drawsprites(sprites)
+			spawnbasicenemies(level + 2)
+			stage += 1
+		
+		elif stage == 10:
+			background_sprites = []
+			sprites = [{"type": "player", "x_coord": 250, "y_coord": 250, "health": 100,
+			"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": pink}]
+			screen.fill(black)
+			text = font.render(str("Congrats. Level 10 woot!"), True, l_blue)
+			screen.blit(text, [150, 200])
+		
+		elif stage != 10:
+			movesprite(sprites)
+			drawsprites(sprites)
 
 		
 	
@@ -261,6 +272,14 @@ def EnemyCollision(new_enemy):
 			z += 1
 			
 	return False
+	
+def playercollision(bullet):
+
+	rect_a = [bullet["x_coord"], bullet["y_coord"], bullet["x_width"], bullet["y_length"]]
+	rect_b = [sprites[0]["x_coord"], sprites[0]["y_coord"], sprites[0]["x_width"], sprites[0]["y_length"]]
+	
+	if DetectCollisions(rect_a, rect_b) == True:
+		return True
 
 		
 def spawnbasicenemies(amount):
@@ -311,6 +330,8 @@ def enemyfire(enemy):
 		
 def drawsprites(sprites):
 
+
+
 	y = 0
 	
 	for i in background_sprites:
@@ -327,6 +348,7 @@ def movesprite(sprites):
 
 	global score
 	global combo
+	global dead
 
 	#basic physics all objects have, move them by their speed
 	i = 0
@@ -367,6 +389,16 @@ def movesprite(sprites):
 				if sprites[enemy]["type"] != "particle":
 					sprites[enemy]["health"] = sprites[enemy]["health"] - sprites[i]["damage"]
 					sprites.remove(sprites[i])
+					
+		elif sprites[i]["type"] == "e_bullet":
+			if sprites[i]["y_coord"] > 500:
+				sprites.remove(sprites[i])
+				
+			elif playercollision(sprites[i]) == True:
+				sprites[0]["health"] = sprites[0]["health"] - sprites[i]["damage"]
+				sprites.remove(sprites[i])
+				sprites[0]["color"] = colors[randint(0,8)]
+				
 			
 		elif sprites[i]["type"] == "basic_enemy":
 				
@@ -426,7 +458,10 @@ def movesprite(sprites):
 				sprites.remove(sprites[i])
 				
 		elif sprites[i]["type"] == "player":
-			if sprites[i]["x_coord"] < 0:
+			if sprites[i]["health"] <= 0:
+				dead = True
+		
+			elif sprites[i]["x_coord"] < 0:
 				sprites[i]["x_coord"] = 0
 
 		
