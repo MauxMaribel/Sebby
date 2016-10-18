@@ -1,6 +1,15 @@
 import pygame
 from random import randint
 
+#Make a fireworks function and put at start screen and win screen
+#Ask about error with pygame.quit() and how to quit game more naturally
+#Create Player Healthbar
+#Add Sounds
+#Add Boss at stage 9
+#Add explosion/shake when player is hit with bullet
+#Add Powerups & Transporter ships
+#Create dynamic colors for background
+
 pygame.init()
 
 black = (0, 0, 0)
@@ -17,6 +26,7 @@ yellow = (255, 255, 0)
 colors = [red, green, blue, pink, purple, l_blue, orange, yellow, white]
 bcolors = [white, pink, yellow]
 
+start = False
 dead = False
 
 size = [500, 500]
@@ -26,27 +36,20 @@ font = pygame.font.SysFont('Calibri', 15, True, False)
 
 button_font = pygame.font.SysFont('Calibri', 25, True, False)
 
-pygame.display.set_caption("Under Construction Shooter <3")
+pygame.display.set_caption("Colortastic explosions")
 
 #This is a Button class. You can create buttons using
 #Button() to create a new button object.
-#
-#Example:
-#mybutton = Button()
-#mybutton.text = 'Play Game'
-#mybutton.color = pink
-#mybutton.text_color = black
+
 class Button:
-	x = 100
-	y = 100
+	x = 70
+	y = 300
 	w = 120
 	h = 80
 
-	#The text on the button. Change this after creating
-	#a button to set what you want the text to be.
 	text = "test"
-	color = blue
-	color_mouseover = red
+	color = l_blue
+	color_mouseover = purple
 	text_color = white
 
 	#records if the mouse button was pressed on the previous
@@ -95,10 +98,8 @@ class Button:
 #our list of buttons. This is kind of like sprites but for buttons.
 buttons = []
 
-#Add one test button.
-buttons.append(Button())
 
-#Call this every frame to draw all the buttons
+
 def drawButtons():
 	for b in buttons:
 		b.draw()
@@ -112,13 +113,21 @@ done = False
 
 clock = pygame.time.Clock()
 
-#pygame.mouse.set_visible(0)
 
 
+startbutton = Button()
+startbutton.text = "Start!"
+startbutton.color = pink
+startbutton.text_color = black
+startbutton.color_mouseover = colors[randint(0, 8)]
 
 
-#find out how to make a health bar
+buttons.append(startbutton)
 
+quitbutton = Button()
+quitbutton.text = "Quit"
+quitbutton.x = 320
+buttons.append(quitbutton)
 
 
 stage = 0
@@ -138,6 +147,25 @@ sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
  "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
 background_sprites = [] 
+
+fireworks = []
+
+def CreateFireworks(amount):
+
+	while amount > 0:
+		color = colors[randint(0, 8)]
+		x = randint(50, 450)
+		x_speed = randint(-1, 1)
+		y_speed = randint(-10, -5)
+		life = randint(30, 60)
+	
+		bullet = {"type": "bullet", "x_coord": x, "y_coord": 500, "x_speed": x_speed, "y_speed": y_speed,
+		"color": color, "x_width": 4, "y_length": 6, "life": life}
+		fireworks.append(bullet)
+		amount -= 1
+		
+	
+
  
 def CreateBackground(stage):
 
@@ -210,50 +238,140 @@ def enemydeath(enemy):
 		"y_speed": y_speed, "y_length": 2, "x_width": 2, "time": 11, "health": 2, "color": color, "color2": color2}
 		sprites.append(part)
 		i -= 1
+		
+def NewText(string, color, x, y):
+	font = pygame.font.SysFont('Calibri', 15, True, False)
+	text = font.render(str(string), True, color)
+	screen.blit(text, [x,y])
+	
+def NewTextLarge(string, color, x, y):
+	font = pygame.font.SysFont('Calibri', 30, True, False)
+	text = font.render(str(string), True, color)
+	screen.blit(text, [x,y])
 
 
 def NextStage(level):
 
+	global start
 	global stage
 	global background_sprites 
 	global sprites
 	global dead
+	global score
+	global fireworks
 
 	#insert some text or animations for stage increase
 	#game over screen probably goes here
-	if dead == True:
-		sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
- "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
-		background_sprites = []
-		screen.fill(black)
-		text = font.render(str("You died. Try sucking less."), True, orange)
-		screen.blit(text, [150, 200])
 	
-	elif dead == False:
-		m = 0
-		new_stage = True
-		for i in sprites:
-			if sprites[m]["type"] == "basic_enemy":
-				new_stage = False
-			m += 1
+	if start == False:
+
+		thinkButtons()
+		for button in buttons:
+			if startbutton.clicked():
+				start = True
+				fireworks = []
+			elif quitbutton.clicked():
+				pygame.quit()
+				
+		if fireworks == []:
+			CreateFireworks(randint(10,20))
+			
+		screen.fill(black)
+		movesprite(sprites)
+		drawfireworks(fireworks)
+		NewTextLarge("Are you ready for some", l_blue, 100, 100)
+		NewTextLarge("Colortastic Explosions?", l_blue, 100, 140)
+		drawButtons()
+
+		
+		
+	if start == True:	
+
+		
+		if dead == True:
+			pygame.mouse.set_visible(1)
+			startbutton.text = "Replay"
+			sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+			"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
+			background_sprites = []
+			screen.fill(black)
+			text = font.render(str("You died. Try sucking less."), True, orange)
+			screen.blit(text, [150, 200])
+			drawButtons()
+			thinkButtons()
+			for button in buttons:
+				if startbutton.clicked():
+					stage = 0
+					score = 0
+					sprites[0]["health"] = 100
+					CreateBackground(stage)
+					dead = False
+					fireworks = []
+				elif quitbutton.clicked():
+					pygame.quit()
+	
+		elif dead == False:
+
+		
+			pygame.mouse.set_visible(0)
+			m = 0
+			new_stage = True
+			for i in sprites:
+				if sprites[m]["type"] == "basic_enemy":
+					new_stage = False
+				m += 1
 
 			
-		if new_stage == True and stage < 10:
+			if new_stage == True and stage < 10:
 		
-			spawnbasicenemies(level + 2)
-			stage += 1
+				spawnbasicenemies(level + 2)
+				stage += 1
 		
-		elif stage == 10:
-			background_sprites = []
-			sprites = [{"type": "player", "x_coord": 250, "y_coord": 250, "health": 100,
-			"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": pink}]
-			screen.fill(black)
-			text = font.render(str("Congrats. Level 10 woot!"), True, l_blue)
-			screen.blit(text, [150, 200])
+			elif stage == 10:
+				pygame.mouse.set_visible(1)
+				background_sprites = []
+				sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+				"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": pink}]
+				
+				if fireworks == []:
+					CreateFireworks(randint(10, 20))
+				
+				screen.fill(black)
+				movesprite(sprites)
+				drawfireworks(fireworks)
+				NewTextLarge("Congrats you won~!", orange, 120, 150)
+				NewTextLarge("Your Score was", yellow, 170, 200)
+				NewTextLarge(str(score), white, 220, 250)
+				startbutton.text = "Replay"
+				drawButtons()
+				thinkButtons()
+				for button in buttons:
+					if startbutton.clicked():
+						stage = 0
+						score = 0
+						CreateBackground(stage)
+						dead = False
+						fireworks = []
+	
+					elif quitbutton.clicked():
+						pygame.quit()
+				
 		
-		elif stage != 10:
-			movesprite(sprites)
-			drawsprites(sprites)
+			elif stage != 10:
+				text = font.render("Score", True, white)
+				screen.blit(text, [0,0])
+				
+				text = font.render(str(score), True, white)
+				screen.blit(text, [60, 0])
+			
+				text = font.render("Stage:", True, white)
+				screen.blit(text, [420, 0])
+				
+				text = font.render(str(stage), True, white)
+				screen.blit(text, [475, 0])
+
+				movesprite(sprites)
+				drawsprites(sprites)
 
 		
 	
@@ -344,11 +462,21 @@ def drawsprites(sprites):
 		pygame.draw.rect(screen, sprites[x]["color"], [sprites[x]["x_coord"], sprites[x]["y_coord"], sprites[x]["x_width"], sprites[x]["y_length"]])
 		x += 1
 		
+def drawfireworks(fireworks):
+
+	y = 0
+	
+	for i in fireworks:
+		pygame.draw.rect(screen, fireworks[y]["color"], [fireworks[y]["x_coord"],
+		fireworks[y]["y_coord"], fireworks[y]["x_width"], fireworks[y]["y_length"]])
+		y += 1
+		
 def movesprite(sprites):
 
 	global score
 	global combo
 	global dead
+	global fireworks
 
 	#basic physics all objects have, move them by their speed
 	i = 0
@@ -401,8 +529,6 @@ def movesprite(sprites):
 				
 			
 		elif sprites[i]["type"] == "basic_enemy":
-				
-			#after about stage 18 boxes get stuck in each other. Need to address that	
 				
 			result = EnemyCollision(sprites[i])
 			
@@ -471,6 +597,36 @@ def movesprite(sprites):
 		
 		i += 1
 		
+	i = 0
+	while i < len(fireworks):
+
+		fireworks[i]["x_coord"] += fireworks[i]["x_speed"]
+		fireworks[i]["y_coord"] += fireworks[i]["y_speed"]
+		fireworks[i]["life"] -= 1
+		
+		if fireworks[i]["type"] == "bullet":
+			if fireworks[i]["life"] == 0:
+
+				m = 80
+				while m > 0:
+					x_speed = randint(-3, 3)
+					y_speed = randint(-3, 3)
+					color = colors[randint(0,8)]
+					particle = {"type": "particle", "x_coord": fireworks[i]["x_coord"],
+					"y_coord": fireworks[i]["y_coord"], "x_speed": x_speed, "y_speed": y_speed,
+					"color": color, "color2": fireworks[i]["color"], "x_width": 2, "y_length": 2, "life": 10}
+					fireworks.append(particle)
+					m -= 1
+				fireworks.remove(fireworks[i])
+				
+		elif fireworks[i]["type"] == "particle":
+			if fireworks[i]["life"] == 5:
+				fireworks[i]["color"] = fireworks[i]["color2"]
+				
+			elif fireworks[i]["life"] == 0:
+				fireworks.remove(fireworks[i])
+		
+		i += 1
 	
 
 CreateBackground(stage)
@@ -498,27 +654,8 @@ while not done:
 				
 	
 	
-	thinkButtons()
-	for button in buttons:
-		if button.clicked():
-			print "BUTTON WAS CLICKED!!!"
-	
 	
 	screen.fill(black)
-	
-	text = font.render("Score", True, white)
-	screen.blit(text, [0,0])
-
-	text = font.render(str(score), True, white)
-	screen.blit(text, [60, 0])
-	
-	text = font.render("Stage:", True, white)
-	screen.blit(text, [420, 0])
-	
-	text = font.render(str(stage), True, white)
-	screen.blit(text, [475, 0])
-
-	drawButtons()
 	
 	NextStage(stage)
 	pygame.display.flip()
