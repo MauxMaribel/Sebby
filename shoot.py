@@ -143,7 +143,7 @@ y_coord = 450
 x_speed = 0
 y_speed = 0
 
-sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+sprites = [{"type": "player", "type2": "player", "x_coord": 250, "y_coord": 450, "health": 100,
  "x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 
 background_sprites = [] 
@@ -151,6 +151,11 @@ background_sprites = []
 fireworks = []
 
 def CreateFireworks(amount):
+
+#	angle = random()*3.14
+#	speed = 1.0 + random()*2.0
+#	x_velocity = math.cos(angle)*speed
+#	y_velocity = math.sin(angle)*speed
 
 	while amount > 0:
 		color = colors[randint(0, 8)]
@@ -180,7 +185,7 @@ def CreateBackground(stage):
 		y = randint(20, 490)
 		color = bcolors[randint(0,2)]
 	
-		new_star = {"type": "small", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 2,
+		new_star = {"type": "small", "type2": "back", "x_coord": x, "y_coord": y, "x_width": 2, "y_length": 2,
 		"y_speed": 0, "color": color}
 		
 		background_sprites.append(new_star)
@@ -194,7 +199,7 @@ def CreateBackground(stage):
 		y = randint(20, 500)
 		color = bcolors[randint(0,2)]
 	
-		new_bigstar = {"type": "large", "x_coord": x, "y_coord": y, "x_width": 4, "y_length": 4,
+		new_bigstar = {"type": "large", "type2": "back", "x_coord": x, "y_coord": y, "x_width": 4, "y_length": 4,
 		"y_speed": 1, "color": color}
 		
 		background_sprites.append(new_bigstar)
@@ -234,10 +239,17 @@ def enemydeath(enemy):
 	while i > 0:
 		x_speed = randint(-3, 3)
 		y_speed = randint(-3, 3)
-		part = {"type": "particle", "x_coord": x, "y_coord": y, "x_speed": x_speed,
+		part = {"type": "particle", "x_coord": x, "y_coord": y, "x_speed": x_speed, "type2": "part",
 		"y_speed": y_speed, "y_length": 2, "x_width": 2, "time": 11, "health": 2, "color": color, "color2": color2}
 		sprites.append(part)
 		i -= 1
+		
+def bossdeath(enemy):
+
+	enemy["color"] = enemy["color2"]
+	enemy["type"] = "dead"
+	enemy["y_speed"] = 8
+
 		
 def NewText(string, color, x, y):
 	font = pygame.font.SysFont('Calibri', 15, True, False)
@@ -261,7 +273,8 @@ def NextStage(level):
 	global fireworks
 
 	#insert some text or animations for stage increase
-	#game over screen probably goes here
+	#Find way to clean this 
+	#make newstage return true to skip steps
 	
 	if start == False:
 
@@ -282,8 +295,6 @@ def NextStage(level):
 		NewTextLarge("Are you ready for some", l_blue, 100, 100)
 		NewTextLarge("Colortastic Explosions?", l_blue, 100, 140)
 		drawButtons()
-
-		
 		
 	if start == True:	
 
@@ -291,7 +302,7 @@ def NextStage(level):
 		if dead == True:
 			pygame.mouse.set_visible(1)
 			startbutton.text = "Replay"
-			sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+			sprites = [{"type": "player", "type2": "player", "x_coord": 250, "y_coord": 450, "health": 100,
 			"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": blue}]
 			background_sprites = []
 			screen.fill(black)
@@ -317,20 +328,25 @@ def NextStage(level):
 			m = 0
 			new_stage = True
 			for i in sprites:
-				if sprites[m]["type"] == "basic_enemy":
+				if sprites[m]["type2"] == "enemy":
 					new_stage = False
 				m += 1
 
 			
-			if new_stage == True and stage < 10:
+			if new_stage == True and stage < 8:
 		
 				spawnbasicenemies(level + 2)
 				stage += 1
+			
+			elif new_stage == True and stage == 8:
+			
+				BossStage()
+				stage += 1
 		
-			elif stage == 10:
+			elif new_stage == True and stage == 9:
 				pygame.mouse.set_visible(1)
 				background_sprites = []
-				sprites = [{"type": "player", "x_coord": 250, "y_coord": 450, "health": 100,
+				sprites = [{"type": "player", "type2": "player", "x_coord": 250, "y_coord": 450, "health": 100,
 				"x_width": 20, "y_length": 30, "x_speed": 0, "y_speed": 0, "color": pink}]
 				
 				if fireworks == []:
@@ -369,6 +385,12 @@ def NextStage(level):
 				
 				text = font.render(str(stage), True, white)
 				screen.blit(text, [475, 0])
+				
+				text = font.render("Health:", True, white)
+				screen.blit(text, [420, 485])
+				
+				text = font.render(str(sprites[0]["health"]), True, white)
+				screen.blit(text, [470, 485])
 
 				movesprite(sprites)
 				drawsprites(sprites)
@@ -390,6 +412,41 @@ def EnemyCollision(new_enemy):
 			z += 1
 			
 	return False
+	
+	
+def BossStage():
+
+	i = 0
+	m = 0
+	while i < 50:
+		y = 0
+	
+		if m == 10:
+			m = 0
+			
+		type = "bossfraga"
+		
+		if i in range(10, 20):
+			y = -20
+			type = "bossfragb"
+		elif i in range(20, 30):
+			y = -40
+			type = "bossfragc"
+		elif i in range(30, 40):
+			y = -60
+			type = "bossfragd"
+		elif i in range(40, 50):
+			y = -80
+			type = "bossfrage"
+			
+		x = 150 + (m * 20)
+		boss = {"type": type, "type2": "enemy", "x_coord": x, "y_coord": y, "health": 15, "damage": 5,
+		"x_width": 20, "y_length": 20, "x_speed": 0, "y_speed": 2, "color": orange, "color2": yellow, "score": 100}
+		sprites.append(boss)
+		i += 1
+		m += 1
+		
+		
 	
 def playercollision(bullet):
 
@@ -413,7 +470,7 @@ def spawnbasicenemies(amount):
 		y_speed = randint(-3, 3)
 		shoot = randint(60, 180)
 	
-		new_enemy = {"type": "basic_enemy", "x_coord": x, "y_coord": y,
+		new_enemy = {"type": "basic_enemy", "type2": "enemy", "x_coord": x, "y_coord": y,
 		"x_width": 30, "y_length": 20, "x_speed": x_speed, "y_speed": y_speed,
 		"shoot": shoot, "health": 10, "score": 100, "color": color}
 
@@ -431,7 +488,7 @@ def firebullet(amount):
 	y = sprites[0]["y_coord"] - 6
 	color = colors[randint(0, 8)]
 	
-	new_bullet = {"type": "p_bullet", "x_coord": x, "y_coord": y, "x_width": 2,
+	new_bullet = {"type": "p_bullet", "type2": "bullet", "x_coord": x, "y_coord": y, "x_width": 2,
 	"y_length": 6, "y_speed": -10, "x_speed": 0, "damage": 5, "health": 1, "color": color}
 	sprites.append(new_bullet)
 	
@@ -442,12 +499,22 @@ def enemyfire(enemy):
 	x = enemy["x_coord"] + 15
 	y = enemy["y_coord"] + 10
 	
-	e_bullet = {"type": "e_bullet", "x_coord": x, "y_coord": y, "x_width": 5,
+	e_bullet = {"type": "e_bullet", "type2": "enemy", "x_coord": x, "y_coord": y, "x_width": 5,
 	"y_length": 7, "y_speed": 6, "x_speed": 0, "damage": 5, "health": 1, "color": l_blue}
 	sprites.append(e_bullet)
+	
+def bossaction():
+
+	#write out 3-4 different motions for the boss
+	#maybe move in a circle? 
+	#shoot laser beam
+	#shoot spray shot, left to right and right to left
+	#bombs/ power-ups/ health
+	#summon adds
+		print "pass"
+	
 		
 def drawsprites(sprites):
-
 
 
 	y = 0
@@ -593,6 +660,65 @@ def movesprite(sprites):
 		
 			elif sprites[i]["x_coord"] + 20 > 500:
 				sprites[i]["x_coord"] = 500 - 20
+				
+		elif sprites[i]["type"] == "bossfraga":
+			if sprites[i]["y_coord"] == 250 and sprites[i]["y_speed"] != 0:
+				sprites[i]["y_speed"] = 0
+				
+			elif sprites[i]["health"] <= 0:
+			
+				bossdeath(sprites[i])
+				
+		elif sprites[i]["type"] == "bossfragb":
+			if sprites[i]["y_coord"] == 230 and sprites[i]["y_speed"] != 0:
+				sprites[i]["y_speed"] = 0
+				
+			elif sprites[i]["health"] <= 0:
+
+				bossdeath(sprites[i])
+
+
+		elif sprites[i]["type"] == "bossfragc":
+			if sprites[i]["y_coord"] == 210 and sprites[i]["y_speed"] != 0:
+				sprites[i]["y_speed"] = 0
+				
+			elif sprites[i]["health"] <= 0:
+			
+				bossdeath(sprites[i])
+
+				
+		elif sprites[i]["type"] == "bossfragd":
+			if sprites[i]["y_coord"] == 190 and sprites[i]["y_speed"] != 0:
+				sprites[i]["y_speed"] = 0
+				
+			elif sprites[i]["health"] <= 0:
+			
+				bossdeath(sprites[i])
+
+				
+		elif sprites[i]["type"] == "bossfrage":
+			if sprites[i]["y_coord"] == 170 and sprites[i]["y_speed"] != 0:
+				sprites[i]["y_speed"] = 0
+				
+			elif sprites[i]["health"] <= 0:
+
+				bossdeath(sprites[i])
+				
+		elif sprites[i]["type"] == "dead":
+		
+			if playercollision(sprites[i]) == True:
+				sprites[0]["health"] = sprites[0]["health"] - sprites[i]["damage"]
+				enemydeath(sprites[i])
+				score += sprites[i]["score"] * combo
+				sprites.remove(sprites[i])
+				sprites[0]["color"] = colors[randint(0,8)]
+				
+		
+			elif sprites[i]["y_coord"] > 470:
+		
+				enemydeath(sprites[i])
+				score += sprites[i]["score"] * combo
+				sprites.remove(sprites[i])
 
 		
 		i += 1
@@ -614,7 +740,7 @@ def movesprite(sprites):
 					color = colors[randint(0,8)]
 					particle = {"type": "particle", "x_coord": fireworks[i]["x_coord"],
 					"y_coord": fireworks[i]["y_coord"], "x_speed": x_speed, "y_speed": y_speed,
-					"color": color, "color2": fireworks[i]["color"], "x_width": 2, "y_length": 2, "life": 10}
+					"color": color, "color2": fireworks[i]["color"], "x_width": 2, "y_length": 2, "life": 20}
 					fireworks.append(particle)
 					m -= 1
 				fireworks.remove(fireworks[i])
